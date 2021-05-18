@@ -4,7 +4,7 @@ const https = require('https');
 const url = require('url');
 const moment = require('moment');
 const { CronJob } = require('cron');
-const sound = require('sound-play');
+const player = require('play-sound')(opts = {});
 
 const PINCODE = 135001;
 const DATE = moment().add(0, 'day').format('DD-MM-YYYY');
@@ -16,7 +16,7 @@ const findVaccineSlot = async() => {
     ((body || {}).centers || []).forEach(center => {
         (center.sessions || []).forEach(session => {
             if(session.min_age_limit >= 18 && session.available_capacity >= 0) {
-                sound.play("alert.mp3");
+                player.play(__dirname + '/alert.mp3', (err) => { if(err) console.log("Error in playing sound ==> " + JSON.stringify(err)) });
                 console.log(`FOUND CENTER @ AGE: ${session.min_age_limit}, NAME: ${center.name}, ADDRESS: ${center.address}, VACCINE: ${session.vaccine}, DOSE-1: ${session.available_capacity_dose1}, DOSE-2: ${session.available_capacity_dose2}`)
             }
         })
@@ -28,7 +28,7 @@ const findVaccineSlot = async() => {
 //     ((body || {}).centers || []).forEach(center => {
 //         (center.sessions || []).forEach(session => {
 //             if(session.min_age_limit >= 18 && session.available_capacity >= 0) {
-//                 sound.play("alert.mp3");
+//                 player.play(__dirname + '/alert.mp3', (err) => { if(err) console.log("Error in playing sound ==> " + JSON.stringify(err)) });
 //                 console.log(`FOUND CENTER @ AGE: ${session.min_age_limit}, NAME: ${center.name}, ADDRESS: ${center.address}, VACCINE: ${session.vaccine}, DOSE-1: ${session.available_capacity_dose1}, DOSE-2: ${session.available_capacity_dose2}`)
 //             }
 //         })
@@ -61,6 +61,7 @@ const httpRequestGenerator = () => new Promise(async(resolve, reject) => {
 // app.listen(3000, () => 
 //     console.log("CO-WIN Server is running @ 3000")
 // )
+
 new CronJob('* * * * *', async () => {
     console.log("******************************************************************************************************************************");
     console.log(`Vaccination Slot Details ==> @ ${moment()}`);
